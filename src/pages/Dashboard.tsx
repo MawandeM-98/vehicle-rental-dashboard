@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { StatsCards } from '../components/dashboard/StatsCards';
+import { StatsCards } from '../components/dashboard/StatsCard';
 import { UpcomingBookings } from '../components/dashboard/UpcomingBookings';
 import { RecentQuotations } from '../components/dashboard/RecentQuotations';
 import { QuickActions } from '../components/dashboard/QuickActions';

@@ -1,5 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { TrendingUp, TrendingDown } from 'lucide-react';
+import { DashboardStats } from '../../types';
 
 interface StatsCardProps {
   title: string;
@@ -37,7 +38,7 @@ function StatsCard({ title, value, growth, prefix = '' }: StatsCardProps) {
   );
 }
 
-export function StatsCards({ stats }: { stats: any }) {
+export function StatsCards({ stats }: { stats: DashboardStats }) {
   return (
     <div className="grid grid-cols-4 gap-6">
       <StatsCard 

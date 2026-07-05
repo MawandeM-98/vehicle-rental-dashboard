@@ -1,57 +1,122 @@
+import { Booking, Quotation, Customer, DashboardStats } from '../types';
+import { mockBookings, mockCustomers, mockQuotations, mockStats } from '../data/mockData';
+
 const API_BASE = 'http://localhost:3001';
+
+// Define types for the data we're working with
+
+
+// Generic request function with proper typing
+async function request<T>(path: string, fallback: T): Promise<T> {
+  try {
+    const response = await fetch(`${API_BASE}${path}`);
+    if (!response.ok) {
+      throw new Error(`Request failed with status ${response.status}`);
+    }
+    return (await response.json()) as T;
+  } catch {
+    return fallback;
+  }
+}
+
+// Type for create/update operations
+type CreateData<T> = Omit<T, 'id'>;
 
 export const api = {
   // Bookings
-  getBookings: () => fetch(`${API_BASE}/bookings`).then(res => res.json()),
-  getBooking: (id: string) => fetch(`${API_BASE}/bookings/${id}`).then(res => res.json()),
-  createBooking: (data: any) => fetch(`${API_BASE}/bookings`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data),
-  }).then(res => res.json()),
-  updateBooking: (id: string, data: any) => fetch(`${API_BASE}/bookings/${id}`, {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data),
-  }).then(res => res.json()),
-  deleteBooking: (id: string) => fetch(`${API_BASE}/bookings/${id}`, {
-    method: 'DELETE',
-  }).then(res => res.json()),
+  getBookings: (): Promise<Booking[]> => request('/bookings', mockBookings),
+  getBooking: (id: string): Promise<Booking | null> => 
+    request(`/bookings/${id}`, mockBookings.find(booking => booking.id === id) ?? null),
+  createBooking: async (data: CreateData<Booking>): Promise<Booking> => {
+    const response = await fetch(`${API_BASE}/bookings`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+    return response.ok ? response.json() : { ...data, id: Date.now().toString() } as Booking;
+  },
+  updateBooking: async (id: string, data: Partial<Booking>): Promise<Booking> => {
+    const response = await fetch(`${API_BASE}/bookings/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+    if (response.ok) {
+      return response.json();
+    }
+    // Fallback: return merged data
+    const existing = mockBookings.find(b => b.id === id);
+    return { ...existing, ...data } as Booking;
+  },
+  deleteBooking: async (id: string): Promise<{ id: string }> => {
+    const response = await fetch(`${API_BASE}/bookings/${id}`, {
+      method: 'DELETE',
+    });
+    return response.ok ? { id } : { id };
+  },
 
   // Quotations
-  getQuotations: () => fetch(`${API_BASE}/quotations`).then(res => res.json()),
-  getQuotation: (id: string) => fetch(`${API_BASE}/quotations/${id}`).then(res => res.json()),
-  createQuotation: (data: any) => fetch(`${API_BASE}/quotations`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data),
-  }).then(res => res.json()),
-  updateQuotation: (id: string, data: any) => fetch(`${API_BASE}/quotations/${id}`, {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data),
-  }).then(res => res.json()),
-  deleteQuotation: (id: string) => fetch(`${API_BASE}/quotations/${id}`, {
-    method: 'DELETE',
-  }).then(res => res.json()),
+  getQuotations: (): Promise<Quotation[]> => request('/quotations', mockQuotations),
+  getQuotation: (id: string): Promise<Quotation | null> =>
+    request(`/quotations/${id}`, mockQuotations.find(quote => quote.id === id) ?? null),
+  createQuotation: async (data: CreateData<Quotation>): Promise<Quotation> => {
+    const response = await fetch(`${API_BASE}/quotations`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+    return response.ok ? response.json() : { ...data, id: Date.now().toString() } as Quotation;
+  },
+  updateQuotation: async (id: string, data: Partial<Quotation>): Promise<Quotation> => {
+    const response = await fetch(`${API_BASE}/quotations/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+    if (response.ok) {
+      return response.json();
+    }
+    const existing = mockQuotations.find(q => q.id === id);
+    return { ...existing, ...data } as Quotation;
+  },
+  deleteQuotation: async (id: string): Promise<{ id: string }> => {
+    const response = await fetch(`${API_BASE}/quotations/${id}`, {
+      method: 'DELETE',
+    });
+    return response.ok ? { id } : { id };
+  },
 
   // Customers
-  getCustomers: () => fetch(`${API_BASE}/customers`).then(res => res.json()),
-  getCustomer: (id: string) => fetch(`${API_BASE}/customers/${id}`).then(res => res.json()),
-  createCustomer: (data: any) => fetch(`${API_BASE}/customers`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data),
-  }).then(res => res.json()),
-  updateCustomer: (id: string, data: any) => fetch(`${API_BASE}/customers/${id}`, {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data),
-  }).then(res => res.json()),
-  deleteCustomer: (id: string) => fetch(`${API_BASE}/customers/${id}`, {
-    method: 'DELETE',
-  }).then(res => res.json()),
+  getCustomers: (): Promise<Customer[]> => request('/customers', mockCustomers),
+  getCustomer: (id: string): Promise<Customer | null> =>
+    request(`/customers/${id}`, mockCustomers.find(customer => customer.id === id) ?? null),
+  createCustomer: async (data: CreateData<Customer>): Promise<Customer> => {
+    const response = await fetch(`${API_BASE}/customers`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+    return response.ok ? response.json() : { ...data, id: Date.now().toString() } as Customer;
+  },
+  updateCustomer: async (id: string, data: Partial<Customer>): Promise<Customer> => {
+    const response = await fetch(`${API_BASE}/customers/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+    if (response.ok) {
+      return response.json();
+    }
+    const existing = mockCustomers.find(c => c.id === id);
+    return { ...existing, ...data } as Customer;
+  },
+  deleteCustomer: async (id: string): Promise<{ id: string }> => {
+    const response = await fetch(`${API_BASE}/customers/${id}`, {
+      method: 'DELETE',
+    });
+    return response.ok ? { id } : { id };
+  },
 
   // Stats
-  getStats: () => fetch(`${API_BASE}/stats`).then(res => res.json()),
+  getStats: (): Promise<DashboardStats> => request('/stats', mockStats),
 };

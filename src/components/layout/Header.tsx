@@ -1,4 +1,4 @@
-import { Bell, User, Search } from 'lucide-react';
+import { Bell, Search } from 'lucide-react';
 import { Input } from '../ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { Button } from '../ui/button';

@@ -1,3 +1,3 @@
-export function Vehicles() {
-  return <div className="text-center py-12">Vehicles Page</div>;
+export function Calendar() {
+  return <div className="text-center py-12">Calendar Page</div>;
 }
