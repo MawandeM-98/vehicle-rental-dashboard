@@ -3,10 +3,6 @@ import { mockBookings, mockCustomers, mockQuotations, mockStats } from '../data/
 
 const API_BASE = 'http://localhost:3001';
 
-// Define types for the data we're working with
-
-
-// Generic request function with proper typing
 async function request<T>(path: string, fallback: T): Promise<T> {
   try {
     const response = await fetch(`${API_BASE}${path}`);
@@ -19,15 +15,16 @@ async function request<T>(path: string, fallback: T): Promise<T> {
   }
 }
 
-// Type for create/update operations
-type CreateData<T> = Omit<T, 'id'>;
+type CreateBookingData = Omit<Booking, 'id'>;
+type CreateQuotationData = Omit<Quotation, 'id'>;
+type CreateCustomerData = Omit<Customer, 'id'>;
 
 export const api = {
   // Bookings
   getBookings: (): Promise<Booking[]> => request('/bookings', mockBookings),
   getBooking: (id: string): Promise<Booking | null> => 
     request(`/bookings/${id}`, mockBookings.find(booking => booking.id === id) ?? null),
-  createBooking: async (data: CreateData<Booking>): Promise<Booking> => {
+  createBooking: async (data: CreateBookingData): Promise<Booking> => {
     const response = await fetch(`${API_BASE}/bookings`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -44,7 +41,6 @@ export const api = {
     if (response.ok) {
       return response.json();
     }
-    // Fallback: return merged data
     const existing = mockBookings.find(b => b.id === id);
     return { ...existing, ...data } as Booking;
   },
@@ -59,7 +55,7 @@ export const api = {
   getQuotations: (): Promise<Quotation[]> => request('/quotations', mockQuotations),
   getQuotation: (id: string): Promise<Quotation | null> =>
     request(`/quotations/${id}`, mockQuotations.find(quote => quote.id === id) ?? null),
-  createQuotation: async (data: CreateData<Quotation>): Promise<Quotation> => {
+  createQuotation: async (data: CreateQuotationData): Promise<Quotation> => {
     const response = await fetch(`${API_BASE}/quotations`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -90,7 +86,7 @@ export const api = {
   getCustomers: (): Promise<Customer[]> => request('/customers', mockCustomers),
   getCustomer: (id: string): Promise<Customer | null> =>
     request(`/customers/${id}`, mockCustomers.find(customer => customer.id === id) ?? null),
-  createCustomer: async (data: CreateData<Customer>): Promise<Customer> => {
+  createCustomer: async (data: CreateCustomerData): Promise<Customer> => {
     const response = await fetch(`${API_BASE}/customers`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },

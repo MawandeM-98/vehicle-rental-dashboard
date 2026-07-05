@@ -1,7 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../components/ui/table';
 import { Badge } from '../components/ui/badge';
 import { Button } from '../components/ui/button';
+import { NewQuotationModal } from '../components/quotations/NewQuotationModal';
 import { api } from '../services/api';
 import { Quotation } from '../types';
 
@@ -17,12 +18,22 @@ export function Quotations() {
   const [quotations, setQuotations] = useState<Quotation[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    api.getQuotations().then(data => {
+  // Fixed: Used useCallback to prevent cascading renders
+  const fetchQuotations = useCallback(async () => {
+    setLoading(true);
+    try {
+      const data = await api.getQuotations();
       setQuotations(data);
+    } catch (error) {
+      console.error('Failed to fetch quotations:', error);
+    } finally {
       setLoading(false);
-    });
+    }
   }, []);
+
+  useEffect(() => {
+    fetchQuotations();
+  }, [fetchQuotations]);
 
   if (loading) return <div>Loading...</div>;
 
@@ -30,7 +41,7 @@ export function Quotations() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold">Quotations</h2>
-        <Button>+ New Quotation</Button>
+        <NewQuotationModal onSuccess={fetchQuotations} />
       </div>
       <div className="bg-white rounded-lg border border-slate-200">
         <Table>

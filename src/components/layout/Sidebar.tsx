@@ -26,10 +26,10 @@ const menuItems = [
 
 export function Sidebar() {
   return (
-    <aside className="w-64 bg-slate-900 text-white h-screen fixed left-0 top-0 overflow-y-auto">
+    <aside className="w-64 bg-slate-900 dark:bg-slate-950 text-white h-screen fixed left-0 top-0 overflow-y-auto">
       <div className="p-6">
         <h1 className="text-2xl font-bold">RentalHub</h1>
-        <p className="text-slate-400 text-sm">Vehicle Rental Platform</p>
+        <p className="text-slate-400 dark:text-slate-500 text-sm">Vehicle Rental Platform</p>
       </div>
       <nav className="mt-6">
         {menuItems.map((item) => (
@@ -39,8 +39,8 @@ export function Sidebar() {
             className={({ isActive }) =>
               `flex items-center gap-3 px-6 py-3 text-sm transition-colors ${
                 isActive 
-                  ? 'bg-slate-800 text-white border-r-4 border-blue-500' 
-                  : 'text-slate-400 hover:bg-slate-800 hover:text-white'
+                  ? 'bg-slate-800 dark:bg-slate-800 text-white border-r-4 border-blue-500' 
+                  : 'text-slate-400 dark:text-slate-500 hover:bg-slate-800 dark:hover:bg-slate-800 hover:text-white'
               }`
             }
           >
