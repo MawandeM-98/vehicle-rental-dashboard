@@ -8,7 +8,12 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '../ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { api } from '../../services/api';
-import { ControllerRenderProps } from 'react-hook-form';
+
+// FIXED: Move ID generation outside the component
+const generateQuotationId = () => {
+  const timestamp = Date.now().toString();
+  return `QT-${timestamp.slice(-4)}`;
+};
 
 const quotationSchema = z.object({
   customer: z.string().min(1, 'Customer is required'),
@@ -35,19 +40,12 @@ export function NewQuotationModal({ onSuccess }: NewQuotationModalProps) {
     },
   });
 
-  // FIXED: Disable the purity rule for this specific function
-  // eslint-disable-next-line react-hooks/purity
-  const generateId = () => {
-    const timestamp = Date.now().toString();
-    return `QT-${timestamp.slice(-4)}`;
-  };
-
   const handleSubmit = async (data: QuotationFormValues) => {
     setLoading(true);
     try {
       await api.createQuotation({
         ...data,
-        quoteId: generateId(),
+        quoteId: generateQuotationId(),
       });
       setOpen(false);
       form.reset();
@@ -68,12 +66,13 @@ export function NewQuotationModal({ onSuccess }: NewQuotationModalProps) {
         <DialogHeader>
           <DialogTitle>Create New Quotation</DialogTitle>
         </DialogHeader>
-        <Form {...form}>
+        {/* FIXED: Use form={form} NOT {...form} */}
+        <Form form={form}>
           <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
             <FormField
               control={form.control}
               name="customer"
-              render={({ field }: { field: ControllerRenderProps<QuotationFormValues, "customer"> }) => (
+              render={({ field }) => (
                 <FormItem>
                   <FormLabel>Customer</FormLabel>
                   <FormControl>
@@ -86,7 +85,7 @@ export function NewQuotationModal({ onSuccess }: NewQuotationModalProps) {
             <FormField
               control={form.control}
               name="amount"
-              render={({ field }: { field: ControllerRenderProps<QuotationFormValues, "amount"> }) => (
+              render={({ field }) => (
                 <FormItem>
                   <FormLabel>Amount ($)</FormLabel>
                   <FormControl>
@@ -104,7 +103,7 @@ export function NewQuotationModal({ onSuccess }: NewQuotationModalProps) {
             <FormField
               control={form.control}
               name="validUntil"
-              render={({ field }: { field: ControllerRenderProps<QuotationFormValues, "validUntil"> }) => (
+              render={({ field }) => (
                 <FormItem>
                   <FormLabel>Valid Until</FormLabel>
                   <FormControl>
@@ -117,7 +116,7 @@ export function NewQuotationModal({ onSuccess }: NewQuotationModalProps) {
             <FormField
               control={form.control}
               name="status"
-              render={({ field }: { field: ControllerRenderProps<QuotationFormValues, "status"> }) => (
+              render={({ field }) => (
                 <FormItem>
                   <FormLabel>Status</FormLabel>
                   <Select onValueChange={field.onChange} defaultValue={field.value}>

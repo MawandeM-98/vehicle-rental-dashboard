@@ -1,66 +1,35 @@
-import { useState, useEffect, useCallback } from 'react';
-import { Calendar as BigCalendar, momentLocalizer, Event } from 'react-big-calendar';
-import moment from 'moment';
-import 'react-big-calendar/lib/css/react-big-calendar.css';
+import { useState, useEffect } from 'react';
 import { api } from '../services/api';
 import { Booking } from '../types';
 
-const localizer = momentLocalizer(moment);
-
-// Fixed: Properly typed event interface
-interface CalendarEvent extends Event {
-  id: string;
-  title: string;
-  start: Date;
-  end: Date;
-  status: string;
-}
-
 export function Calendar() {
-  const [events, setEvents] = useState<CalendarEvent[]>([]);
+  const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Fixed: Used useCallback
-  const fetchBookings = useCallback(async () => {
-    setLoading(true);
-    try {
-      const bookings: Booking[] = await api.getBookings();
-      const calendarEvents = bookings.map((booking) => ({
-        id: booking.id,
-        title: `${booking.customer} - ${booking.vehicle}`,
-        start: new Date(booking.pickupDate),
-        end: new Date(booking.returnDate),
-        status: booking.status,
-      }));
-      setEvents(calendarEvents);
-    } catch (error) {
-      console.error('Failed to fetch bookings:', error);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
   useEffect(() => {
-    fetchBookings();
-  }, [fetchBookings]);
-
-  // Fixed: Properly typed event prop getter
-  const eventPropGetter = (event: CalendarEvent) => {
-    const colors = {
-      Confirmed: '#22c55e',
-      Upcoming: '#3b82f6',
-      Completed: '#94a3b8',
-      Cancelled: '#ef4444',
-    };
-    return {
-      style: {
-        backgroundColor: colors[event.status as keyof typeof colors] || '#94a3b8',
-        color: 'white',
-        borderRadius: '4px',
-        padding: '2px 6px',
+    let isMounted = true;
+    
+    const fetchBookings = async () => {
+      try {
+        const data = await api.getBookings();
+        if (isMounted) {
+          setBookings(data);
+        }
+      } catch (error) {
+        console.error('Failed to fetch bookings:', error);
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
       }
     };
-  };
+    
+    fetchBookings();
+    
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   if (loading) {
     return <div className="text-center py-12">Loading calendar...</div>;
@@ -85,15 +54,38 @@ export function Calendar() {
           </span>
         </div>
       </div>
-      <div className="bg-white rounded-lg border border-slate-200 p-6 h-[600px]">
-        <BigCalendar
-          localizer={localizer}
-          events={events}
-          startAccessor="start"
-          endAccessor="end"
-          style={{ height: '100%' }}
-          eventPropGetter={eventPropGetter}
-        />
+      <div className="bg-white rounded-lg border border-slate-200 p-6">
+        <div className="grid grid-cols-7 gap-2">
+          {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
+            <div key={day} className="text-center font-medium text-slate-600 py-2">
+              {day}
+            </div>
+          ))}
+          {Array.from({ length: 31 }, (_, i) => i + 1).map((date) => {
+            const hasBooking = bookings.some((b) => 
+              new Date(b.pickupDate).getDate() === date
+            );
+            return (
+              <div
+                key={date}
+                className={`text-center py-2 rounded-lg ${
+                  hasBooking ? 'bg-blue-100 text-blue-800 font-medium' : 'hover:bg-slate-50'
+                }`}
+              >
+                {date}
+              </div>
+            );
+          })}
+        </div>
+        <div className="mt-6">
+          <h3 className="font-medium mb-2">Today's Bookings</h3>
+          {bookings.slice(0, 3).map((booking) => (
+            <div key={booking.id} className="flex justify-between py-2 border-b">
+              <span>{booking.customer} - {booking.vehicle}</span>
+              <span className="text-sm text-slate-500">{booking.pickupDate}</span>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );

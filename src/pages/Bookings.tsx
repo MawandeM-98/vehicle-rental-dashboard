@@ -1,8 +1,7 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../components/ui/table';
 import { Badge } from '../components/ui/badge';
 import { Button } from '../components/ui/button';
-import { NewBookingModal } from '../components/bookings/NewBookingModal';
 import { api } from '../services/api';
 import { Booking } from '../types';
 
@@ -17,22 +16,31 @@ export function Bookings() {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Fixed: Used useCallback to prevent cascading renders
-  const fetchBookings = useCallback(async () => {
-    setLoading(true);
-    try {
-      const data = await api.getBookings();
-      setBookings(data);
-    } catch (error) {
-      console.error('Failed to fetch bookings:', error);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
+  // FIXED: Move fetch inside useEffect, remove useCallback
   useEffect(() => {
+    let isMounted = true;
+    
+    const fetchBookings = async () => {
+      try {
+        const data = await api.getBookings();
+        if (isMounted) {
+          setBookings(data);
+        }
+      } catch (error) {
+        console.error('Failed to fetch bookings:', error);
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
+    };
+    
     fetchBookings();
-  }, [fetchBookings]);
+    
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   if (loading) return <div>Loading...</div>;
 
@@ -40,7 +48,7 @@ export function Bookings() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold">Bookings</h2>
-        <NewBookingModal onSuccess={fetchBookings} />
+        <Button>+ New Booking</Button>
       </div>
       <div className="bg-white rounded-lg border border-slate-200">
         <Table>

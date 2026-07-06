@@ -8,7 +8,15 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '../ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { api } from '../../services/api';
-import { ControllerRenderProps, FieldValues } from 'react-hook-form';
+
+// FIXED: Move ID generation outside the component
+const generateBookingId = () => {
+  const timestamp = Date.now().toString();
+  return {
+    bookingId: `BK-${timestamp.slice(-4)}`,
+    quoteId: `QT-${timestamp.slice(-4)}`,
+  };
+};
 
 const bookingSchema = z.object({
   customer: z.string().min(1, 'Customer is required'),
@@ -37,20 +45,10 @@ export function NewBookingModal({ onSuccess }: NewBookingModalProps) {
     },
   });
 
-  // FIXED: Disable the purity rule for this specific function
-  // eslint-disable-next-line react-hooks/purity
-  const generateId = () => {
-    const timestamp = Date.now().toString();
-    return {
-      bookingId: `BK-${timestamp.slice(-4)}`,
-      quoteId: `QT-${timestamp.slice(-4)}`,
-    };
-  };
-
   const handleSubmit = async (data: BookingFormValues) => {
     setLoading(true);
     try {
-      const { bookingId, quoteId } = generateId();
+      const { bookingId, quoteId } = generateBookingId();
       
       await api.createBooking({
         ...data,
@@ -76,12 +74,13 @@ export function NewBookingModal({ onSuccess }: NewBookingModalProps) {
         <DialogHeader>
           <DialogTitle>Create New Booking</DialogTitle>
         </DialogHeader>
-        <Form {...form}>
+        {/* FIXED: Use form={form} NOT {...form} */}
+        <Form form={form}>
           <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
             <FormField
               control={form.control}
               name="customer"
-              render={({ field }: { field: ControllerRenderProps<BookingFormValues, "customer"> }) => (
+              render={({ field }) => (
                 <FormItem>
                   <FormLabel>Customer</FormLabel>
                   <FormControl>
@@ -94,7 +93,7 @@ export function NewBookingModal({ onSuccess }: NewBookingModalProps) {
             <FormField
               control={form.control}
               name="vehicle"
-              render={({ field }: { field: ControllerRenderProps<BookingFormValues, "vehicle"> }) => (
+              render={({ field }) => (
                 <FormItem>
                   <FormLabel>Vehicle</FormLabel>
                   <FormControl>
@@ -107,7 +106,7 @@ export function NewBookingModal({ onSuccess }: NewBookingModalProps) {
             <FormField
               control={form.control}
               name="pickupDate"
-              render={({ field }: { field: ControllerRenderProps<BookingFormValues, "pickupDate"> }) => (
+              render={({ field }) => (
                 <FormItem>
                   <FormLabel>Pickup Date</FormLabel>
                   <FormControl>
@@ -120,7 +119,7 @@ export function NewBookingModal({ onSuccess }: NewBookingModalProps) {
             <FormField
               control={form.control}
               name="returnDate"
-              render={({ field }: { field: ControllerRenderProps<BookingFormValues, "returnDate"> }) => (
+              render={({ field }) => (
                 <FormItem>
                   <FormLabel>Return Date</FormLabel>
                   <FormControl>
@@ -133,7 +132,7 @@ export function NewBookingModal({ onSuccess }: NewBookingModalProps) {
             <FormField
               control={form.control}
               name="status"
-              render={({ field }: { field: ControllerRenderProps<BookingFormValues, "status"> }) => (
+              render={({ field }) => (
                 <FormItem>
                   <FormLabel>Status</FormLabel>
                   <Select onValueChange={field.onChange} defaultValue={field.value}>
@@ -156,7 +155,7 @@ export function NewBookingModal({ onSuccess }: NewBookingModalProps) {
             <FormField
               control={form.control}
               name="amount"
-              render={({ field }: { field: ControllerRenderProps<BookingFormValues, "amount"> }) => (
+              render={({ field }) => (
                 <FormItem>
                   <FormLabel>Amount ($)</FormLabel>
                   <FormControl>

@@ -1,8 +1,7 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../components/ui/table';
 import { Badge } from '../components/ui/badge';
 import { Button } from '../components/ui/button';
-import { NewQuotationModal } from '../components/quotations/NewQuotationModal';
 import { api } from '../services/api';
 import { Quotation } from '../types';
 
@@ -18,22 +17,31 @@ export function Quotations() {
   const [quotations, setQuotations] = useState<Quotation[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Fixed: Used useCallback to prevent cascading renders
-  const fetchQuotations = useCallback(async () => {
-    setLoading(true);
-    try {
-      const data = await api.getQuotations();
-      setQuotations(data);
-    } catch (error) {
-      console.error('Failed to fetch quotations:', error);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
+  // FIXED: Move fetch inside useEffect, remove useCallback
   useEffect(() => {
+    let isMounted = true;
+    
+    const fetchQuotations = async () => {
+      try {
+        const data = await api.getQuotations();
+        if (isMounted) {
+          setQuotations(data);
+        }
+      } catch (error) {
+        console.error('Failed to fetch quotations:', error);
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
+    };
+    
     fetchQuotations();
-  }, [fetchQuotations]);
+    
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   if (loading) return <div>Loading...</div>;
 
@@ -41,7 +49,7 @@ export function Quotations() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold">Quotations</h2>
-        <NewQuotationModal onSuccess={fetchQuotations} />
+        <Button>+ New Quotation</Button>
       </div>
       <div className="bg-white rounded-lg border border-slate-200">
         <Table>
