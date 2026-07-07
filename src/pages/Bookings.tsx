@@ -1,7 +1,9 @@
-import { useState, useEffect } from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../components/ui/table';
 import { Badge } from '../components/ui/badge';
 import { Button } from '../components/ui/button';
+import { NewBookingModal } from '../components/bookings/NewBookingModal';
+import { LoadingSpinner } from '../components/LoadingSpinner';
+import { useFetchData } from '../hooks/useFetchData';
 import { api } from '../services/api';
 import { Booking } from '../types';
 
@@ -13,42 +15,23 @@ const statusColors = {
 };
 
 export function Bookings() {
-  const [bookings, setBookings] = useState<Booking[]>([]);
-  const [loading, setLoading] = useState(true);
+  // FIXED: Use custom hook instead of direct useEffect with setState
+  const { data: bookings, loading, error } = useFetchData<Booking[]>(api.getBookings);
 
-  // FIXED: Move fetch inside useEffect, remove useCallback
-  useEffect(() => {
-    let isMounted = true;
-    
-    const fetchBookings = async () => {
-      try {
-        const data = await api.getBookings();
-        if (isMounted) {
-          setBookings(data);
-        }
-      } catch (error) {
-        console.error('Failed to fetch bookings:', error);
-      } finally {
-        if (isMounted) {
-          setLoading(false);
-        }
-      }
-    };
-    
-    fetchBookings();
-    
-    return () => {
-      isMounted = false;
-    };
-  }, []);
+  const refreshData = async () => {
+    // This will trigger a re-fetch
+    window.location.reload(); // Simple refresh
+    // Or you can use a refetch function from the hook
+  };
 
-  if (loading) return <div>Loading...</div>;
+  if (loading) return <LoadingSpinner />;
+  if (error) return <div className="text-center py-8 text-red-500">Error: {error}</div>;
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold">Bookings</h2>
-        <Button>+ New Booking</Button>
+        <NewBookingModal onSuccess={refreshData} />
       </div>
       <div className="bg-white rounded-lg border border-slate-200">
         <Table>
@@ -65,7 +48,7 @@ export function Bookings() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {bookings.map((booking) => (
+            {(bookings || []).map((booking) => (
               <TableRow key={booking.id}>
                 <TableCell className="font-medium">{booking.bookingId}</TableCell>
                 <TableCell>{booking.customer}</TableCell>

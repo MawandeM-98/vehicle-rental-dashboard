@@ -1,5 +1,23 @@
-import { Booking, Quotation, Customer, DashboardStats } from '../types';
-import { mockBookings, mockCustomers, mockQuotations, mockStats } from '../data/mockData';
+import {
+  Booking,
+  Quotation,
+  Customer,
+  DashboardStats,
+  Enquiry,
+  BookingBreakdown,
+  VehicleAvailability,
+  BookingsOverviewPoint,
+} from '../types';
+import {
+  mockBookings,
+  mockCustomers,
+  mockQuotations,
+  mockStats,
+  mockEnquiries,
+  mockBookingBreakdown,
+  mockVehicleAvailability,
+  mockBookingsOverview,
+} from '../data/mockData';
 
 const API_BASE = 'http://localhost:3001';
 
@@ -22,7 +40,7 @@ type CreateCustomerData = Omit<Customer, 'id'>;
 export const api = {
   // Bookings
   getBookings: (): Promise<Booking[]> => request('/bookings', mockBookings),
-  getBooking: (id: string): Promise<Booking | null> => 
+  getBooking: (id: string): Promise<Booking | null> =>
     request(`/bookings/${id}`, mockBookings.find(booking => booking.id === id) ?? null),
   createBooking: async (data: CreateBookingData): Promise<Booking> => {
     const response = await fetch(`${API_BASE}/bookings`, {
@@ -113,6 +131,10 @@ export const api = {
     return response.ok ? { id } : { id };
   },
 
-  // Stats
+  // Stats & dashboard widgets
   getStats: (): Promise<DashboardStats> => request('/stats', mockStats),
+  getEnquiries: (): Promise<Enquiry[]> => request('/enquiries', mockEnquiries),
+  getBookingBreakdown: (): Promise<BookingBreakdown> => request('/bookingBreakdown', mockBookingBreakdown),
+  getVehicleAvailability: (): Promise<VehicleAvailability> => request('/vehicleAvailability', mockVehicleAvailability),
+  getBookingsOverview: (): Promise<BookingsOverviewPoint[]> => request('/bookingsOverview', mockBookingsOverview),
 };

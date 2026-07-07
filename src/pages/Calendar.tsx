@@ -1,35 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useFetchData } from '../hooks/useFetchData';
 import { api } from '../services/api';
 import { Booking } from '../types';
 
 export function Calendar() {
-  const [bookings, setBookings] = useState<Booking[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    let isMounted = true;
-    
-    const fetchBookings = async () => {
-      try {
-        const data = await api.getBookings();
-        if (isMounted) {
-          setBookings(data);
-        }
-      } catch (error) {
-        console.error('Failed to fetch bookings:', error);
-      } finally {
-        if (isMounted) {
-          setLoading(false);
-        }
-      }
-    };
-    
-    fetchBookings();
-    
-    return () => {
-      isMounted = false;
-    };
-  }, []);
+  const { data: bookings, loading } = useFetchData<Booking[]>(api.getBookings);
 
   if (loading) {
     return <div className="text-center py-12">Loading calendar...</div>;
@@ -62,7 +36,7 @@ export function Calendar() {
             </div>
           ))}
           {Array.from({ length: 31 }, (_, i) => i + 1).map((date) => {
-            const hasBooking = bookings.some((b) => 
+            const hasBooking = (bookings || []).some((b: Booking) => 
               new Date(b.pickupDate).getDate() === date
             );
             return (
@@ -79,7 +53,7 @@ export function Calendar() {
         </div>
         <div className="mt-6">
           <h3 className="font-medium mb-2">Today's Bookings</h3>
-          {bookings.slice(0, 3).map((booking) => (
+          {(bookings || []).slice(0, 3).map((booking: Booking) => (
             <div key={booking.id} className="flex justify-between py-2 border-b">
               <span>{booking.customer} - {booking.vehicle}</span>
               <span className="text-sm text-slate-500">{booking.pickupDate}</span>

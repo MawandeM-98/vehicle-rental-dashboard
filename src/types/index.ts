@@ -39,3 +39,35 @@ export interface DashboardStats {
   quotationGrowth: number;
   enquiryGrowth: number;
 }
+
+export interface Enquiry {
+  id: string;
+  name: string;
+  description: string;
+  timeAgo: string;
+  status: 'New' | 'Contacted' | 'Quotation Sent';
+}
+
+export interface BookingBreakdown {
+  confirmed: number;
+  upcoming: number;
+  ongoing: number;
+  completed: number;
+}
+
+export interface VehicleAvailability {
+  available: number;
+  onRent: number;
+  maintenance: number;
+  unavailable: number;
+  total: number;
+}
+
+export interface BookingsOverviewPoint {
+  date: string;
+  bookings: number;
+}
+
+export interface SparklinePoint {
+  value: number;
+}

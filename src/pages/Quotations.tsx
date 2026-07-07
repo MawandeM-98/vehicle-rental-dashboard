@@ -1,7 +1,9 @@
-import { useState, useEffect } from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../components/ui/table';
 import { Badge } from '../components/ui/badge';
 import { Button } from '../components/ui/button';
+import { NewQuotationModal } from '../components/quotations/NewQuotationModal';
+import { LoadingSpinner } from '../components/LoadingSpinner';
+import { useFetchData } from '../hooks/useFetchData';
 import { api } from '../services/api';
 import { Quotation } from '../types';
 
@@ -14,42 +16,21 @@ const statusColors = {
 };
 
 export function Quotations() {
-  const [quotations, setQuotations] = useState<Quotation[]>([]);
-  const [loading, setLoading] = useState(true);
+  // FIXED: Use custom hook instead of direct useEffect with setState
+  const { data: quotations, loading, error } = useFetchData<Quotation[]>(api.getQuotations);
 
-  // FIXED: Move fetch inside useEffect, remove useCallback
-  useEffect(() => {
-    let isMounted = true;
-    
-    const fetchQuotations = async () => {
-      try {
-        const data = await api.getQuotations();
-        if (isMounted) {
-          setQuotations(data);
-        }
-      } catch (error) {
-        console.error('Failed to fetch quotations:', error);
-      } finally {
-        if (isMounted) {
-          setLoading(false);
-        }
-      }
-    };
-    
-    fetchQuotations();
-    
-    return () => {
-      isMounted = false;
-    };
-  }, []);
+  const refreshData = async () => {
+    window.location.reload();
+  };
 
-  if (loading) return <div>Loading...</div>;
+  if (loading) return <LoadingSpinner />;
+  if (error) return <div className="text-center py-8 text-red-500">Error: {error}</div>;
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold">Quotations</h2>
-        <Button>+ New Quotation</Button>
+        <NewQuotationModal onSuccess={refreshData} />
       </div>
       <div className="bg-white rounded-lg border border-slate-200">
         <Table>
@@ -64,7 +45,7 @@ export function Quotations() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {quotations.map((quote) => (
+            {(quotations || []).map((quote) => (
               <TableRow key={quote.id}>
                 <TableCell className="font-medium">{quote.quoteId}</TableCell>
                 <TableCell>{quote.customer}</TableCell>

@@ -1,4 +1,14 @@
-import { Booking, Quotation, Customer, DashboardStats } from '../types';
+import {
+  Booking,
+  Quotation,
+  Customer,
+  DashboardStats,
+  Enquiry,
+  BookingBreakdown,
+  VehicleAvailability,
+  BookingsOverviewPoint,
+  SparklinePoint,
+} from '../types';
 
 export const mockBookings: Booking[] = [
   {
@@ -139,5 +149,86 @@ export const mockStats: DashboardStats = {
   bookingGrowth: 12,
   revenueGrowth: 18,
   quotationGrowth: 5,
-  enquiryGrowth: 8,
+  enquiryGrowth: -8,
 };
+
+export const mockEnquiries: Enquiry[] = [
+  {
+    id: '1',
+    name: 'John Doe',
+    description: 'Corporate Rental - 5 Cars',
+    timeAgo: '2h ago',
+    status: 'New',
+  },
+  {
+    id: '2',
+    name: 'Sarah Mitchell',
+    description: 'Airport Transfer - 1 Van',
+    timeAgo: '4h ago',
+    status: 'New',
+  },
+  {
+    id: '3',
+    name: 'Robert King',
+    description: 'Long Term Rental - 2 SUVs',
+    timeAgo: '1d ago',
+    status: 'Contacted',
+  },
+  {
+    id: '4',
+    name: 'Alice Lee',
+    description: 'Event Transport - 3 Cars',
+    timeAgo: '1d ago',
+    status: 'New',
+  },
+  {
+    id: '5',
+    name: 'Michael Tan',
+    description: 'Daily Rental - 1 Car',
+    timeAgo: '2d ago',
+    status: 'Quotation Sent',
+  },
+];
+
+export const mockBookingBreakdown: BookingBreakdown = {
+  confirmed: 78,
+  upcoming: 32,
+  ongoing: 10,
+  completed: 54,
+};
+
+export const mockVehicleAvailability: VehicleAvailability = {
+  available: 32,
+  onRent: 28,
+  maintenance: 6,
+  unavailable: 6,
+  total: 72,
+};
+
+export const mockBookingsOverview: BookingsOverviewPoint[] = [
+  { date: 'May 1', bookings: 20 },
+  { date: 'May 4', bookings: 15 },
+  { date: 'May 8', bookings: 22 },
+  { date: 'May 11', bookings: 28 },
+  { date: 'May 15', bookings: 24 },
+  { date: 'May 18', bookings: 32 },
+  { date: 'May 22', bookings: 38 },
+  { date: 'May 25', bookings: 30 },
+  { date: 'May 29', bookings: 40 },
+];
+
+export const mockBookingsSparkline: SparklinePoint[] = [
+  { value: 8 }, { value: 12 }, { value: 9 }, { value: 15 }, { value: 13 }, { value: 18 }, { value: 20 },
+];
+
+export const mockRevenueSparkline: SparklinePoint[] = [
+  { value: 20 }, { value: 24 }, { value: 22 }, { value: 30 }, { value: 28 }, { value: 34 }, { value: 38 },
+];
+
+export const mockQuotationsSparkline: SparklinePoint[] = [
+  { value: 14 }, { value: 16 }, { value: 15 }, { value: 18 }, { value: 17 }, { value: 19 }, { value: 20 },
+];
+
+export const mockEnquiriesSparkline: SparklinePoint[] = [
+  { value: 18 }, { value: 16 }, { value: 19 }, { value: 15 }, { value: 13 }, { value: 12 }, { value: 10 },
+];

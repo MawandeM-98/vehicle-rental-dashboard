@@ -1,77 +1,73 @@
-import { useState, useEffect } from 'react';
 import { StatsCards } from '../components/dashboard/StatsCards';
+import { BookingsOverviewChart } from '../components/dashboard/BookingsOverviewChart';
+import { VehicleAvailabilityChart } from '../components/dashboard/VehicleAvailabilityChart';
+import { RecentEnquiries } from '../components/dashboard/RecentEnquiries';
 import { UpcomingBookings } from '../components/dashboard/UpcomingBookings';
 import { RecentQuotations } from '../components/dashboard/RecentQuotations';
 import { QuickActions } from '../components/dashboard/QuickActions';
-import { RevenueChart } from '../components/dashboard/RevenueChart';
+import { LoadingSpinner } from '../components/LoadingSpinner';
+import { useFetchData } from '../hooks/useFetchData';
 import { api } from '../services/api';
-import { Booking, Quotation, DashboardStats } from '../types';
+import {
+  Booking,
+  Quotation,
+  DashboardStats,
+  Enquiry,
+  BookingBreakdown,
+  VehicleAvailability,
+  BookingsOverviewPoint,
+} from '../types';
 
 export function Dashboard() {
-  const [bookings, setBookings] = useState<Booking[]>([]);
-  const [quotations, setQuotations] = useState<Quotation[]>([]);
-  const [stats, setStats] = useState<DashboardStats | null>(null);
-  const [loading, setLoading] = useState(true);
+  const { data: bookings, loading: bookingsLoading } = useFetchData<Booking[]>(api.getBookings);
+  const { data: quotations, loading: quotationsLoading } = useFetchData<Quotation[]>(api.getQuotations);
+  const { data: stats, loading: statsLoading } = useFetchData<DashboardStats>(api.getStats);
+  const { data: enquiries, loading: enquiriesLoading } = useFetchData<Enquiry[]>(api.getEnquiries);
+  const { data: bookingBreakdown, loading: breakdownLoading } = useFetchData<BookingBreakdown>(api.getBookingBreakdown);
+  const { data: vehicleAvailability, loading: vehicleLoading } = useFetchData<VehicleAvailability>(api.getVehicleAvailability);
+  const { data: overview, loading: overviewLoading } = useFetchData<BookingsOverviewPoint[]>(api.getBookingsOverview);
 
-  // FIXED: Move fetch inside useEffect, remove useCallback
-  useEffect(() => {
-    let isMounted = true;
-    
-    const fetchDashboardData = async () => {
-      try {
-        const [bookingsData, quotationsData, statsData] = await Promise.all([
-          api.getBookings(),
-          api.getQuotations(),
-          api.getStats(),
-        ]);
-        if (isMounted) {
-          setBookings(bookingsData.slice(0, 5));
-          setQuotations(quotationsData.slice(0, 5));
-          setStats(statsData);
-        }
-      } catch (error) {
-        console.error('Failed to fetch dashboard data:', error);
-      } finally {
-        if (isMounted) {
-          setLoading(false);
-        }
-      }
-    };
-    
-    fetchDashboardData();
-    
-    return () => {
-      isMounted = false;
-    };
-  }, []);
+  const loading =
+    bookingsLoading ||
+    quotationsLoading ||
+    statsLoading ||
+    enquiriesLoading ||
+    breakdownLoading ||
+    vehicleLoading ||
+    overviewLoading;
 
   if (loading) {
-    return <div className="text-center py-12">Loading dashboard...</div>;
+    return <LoadingSpinner />;
   }
 
   return (
-    <div className="space-y-8">
-      <div>
-        <h1 className="text-2xl font-bold text-slate-800">Welcome back, Admin!</h1>
-        <p className="text-slate-500">Here's what's happening with your rental business today.</p>
-      </div>
-
+    <div className="space-y-6 lg:space-y-8">
       {stats && <StatsCards stats={stats} />}
 
-      <RevenueChart />
-
-      <div className="grid grid-cols-4 gap-6">
-        <div className="col-span-1">
-          <QuickActions />
+      <div className="grid grid-cols-1 xl:grid-cols-12 gap-6">
+        <div className="xl:col-span-5">
+          {overview && bookingBreakdown && (
+            <BookingsOverviewChart data={overview} breakdown={bookingBreakdown} />
+          )}
         </div>
-        <div className="col-span-3 bg-white rounded-lg border border-slate-200 p-6">
-          <h3 className="text-lg font-semibold mb-2">Today's Overview</h3>
-          <p className="text-sm text-slate-500">5 bookings today • 3 pickups • 2 returns</p>
+        <div className="xl:col-span-4">
+          {vehicleAvailability && <VehicleAvailabilityChart data={vehicleAvailability} />}
+        </div>
+        <div className="xl:col-span-3">
+          {enquiries && <RecentEnquiries enquiries={enquiries} />}
         </div>
       </div>
 
-      <UpcomingBookings bookings={bookings} />
-      <RecentQuotations quotations={quotations} />
+      <div className="grid grid-cols-1 xl:grid-cols-12 gap-6">
+        <div className="xl:col-span-7">
+          {bookings && <UpcomingBookings bookings={bookings} />}
+        </div>
+        <div className="xl:col-span-5">
+          {quotations && <RecentQuotations quotations={quotations} />}
+        </div>
+      </div>
+
+      <QuickActions />
     </div>
   );
 }
