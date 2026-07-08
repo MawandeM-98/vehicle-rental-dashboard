@@ -71,3 +71,27 @@ export interface BookingsOverviewPoint {
 export interface SparklinePoint {
   value: number;
 }
+
+export interface Vehicle {
+  id: string;
+  name: string;
+  type: string;
+  status: 'Available' | 'Rented' | 'Maintenance';
+  rate: number;
+  location: string;
+  rentedDays: number;
+  availableDays: number;
+  nextServiceDate: string;
+  lastLocationNote: string;
+}
+
+export type Role = 'Admin' | 'Manager' | 'Staff';
+
+export interface ActivityLogEntry {
+  id: string;
+  timestamp: string;
+  user: string;
+  role: Role;
+  action: string;
+  entity: string;
+}

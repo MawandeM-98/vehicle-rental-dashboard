@@ -1,69 +1,66 @@
-import { StatsCards } from '../components/dashboard/StatsCards';
 import { BookingsOverviewChart } from '../components/dashboard/BookingsOverviewChart';
 import { VehicleAvailabilityChart } from '../components/dashboard/VehicleAvailabilityChart';
 import { RecentEnquiries } from '../components/dashboard/RecentEnquiries';
 import { UpcomingBookings } from '../components/dashboard/UpcomingBookings';
 import { RecentQuotations } from '../components/dashboard/RecentQuotations';
 import { QuickActions } from '../components/dashboard/QuickActions';
-import { LoadingSpinner } from '../components/LoadingSpinner';
-import { useFetchData } from '../hooks/useFetchData';
-import { api } from '../services/api';
-import {
-  Booking,
-  Quotation,
-  DashboardStats,
-  Enquiry,
-  BookingBreakdown,
-  VehicleAvailability,
-  BookingsOverviewPoint,
-} from '../types';
+import { StatsCards } from '../components/dashboard/StatsCards';
+import { useAppContext } from '../context/AppContext';
+import { mockBookingsOverview } from '../data/mockData';
+import { DashboardStats, BookingBreakdown, VehicleAvailability } from '../types';
 
 export function Dashboard() {
-  const { data: bookings, loading: bookingsLoading } = useFetchData<Booking[]>(api.getBookings);
-  const { data: quotations, loading: quotationsLoading } = useFetchData<Quotation[]>(api.getQuotations);
-  const { data: stats, loading: statsLoading } = useFetchData<DashboardStats>(api.getStats);
-  const { data: enquiries, loading: enquiriesLoading } = useFetchData<Enquiry[]>(api.getEnquiries);
-  const { data: bookingBreakdown, loading: breakdownLoading } = useFetchData<BookingBreakdown>(api.getBookingBreakdown);
-  const { data: vehicleAvailability, loading: vehicleLoading } = useFetchData<VehicleAvailability>(api.getVehicleAvailability);
-  const { data: overview, loading: overviewLoading } = useFetchData<BookingsOverviewPoint[]>(api.getBookingsOverview);
+  const { bookings, quotations, enquiries } = useAppContext();
 
-  const loading =
-    bookingsLoading ||
-    quotationsLoading ||
-    statsLoading ||
-    enquiriesLoading ||
-    breakdownLoading ||
-    vehicleLoading ||
-    overviewLoading;
+  const totalRevenue = bookings.reduce((sum, b) => sum + b.amount, 0);
+  const stats: DashboardStats = {
+    totalBookings: bookings.length,
+    totalRevenue,
+    activeQuotations: quotations.filter(q => q.status !== 'Expired').length,
+    newEnquiries: enquiries.filter(e => e.status === 'New').length,
+    bookingGrowth: 12,
+    revenueGrowth: 18,
+    quotationGrowth: 5,
+    enquiryGrowth: -8,
+  };
 
-  if (loading) {
-    return <LoadingSpinner />;
-  }
+  const breakdown: BookingBreakdown = {
+    confirmed: bookings.filter(b => b.status === 'Confirmed').length,
+    upcoming: bookings.filter(b => b.status === 'Upcoming').length,
+    ongoing: bookings.filter(b => b.status === 'Confirmed' && new Date(b.pickupDate) <= new Date()).length,
+    completed: bookings.filter(b => b.status === 'Completed').length,
+  };
+
+  const vehicleAvailability: VehicleAvailability = {
+    available: 32,
+    onRent: 28,
+    maintenance: 6,
+    unavailable: 6,
+    total: 72,
+  };
 
   return (
     <div className="space-y-6 lg:space-y-8">
-      {stats && <StatsCards stats={stats} />}
+      <StatsCards stats={stats} />
 
       <div className="grid grid-cols-1 xl:grid-cols-12 gap-6">
         <div className="xl:col-span-5">
-          {overview && bookingBreakdown && (
-            <BookingsOverviewChart data={overview} breakdown={bookingBreakdown} />
-          )}
+          <BookingsOverviewChart data={mockBookingsOverview} breakdown={breakdown} />
         </div>
         <div className="xl:col-span-4">
-          {vehicleAvailability && <VehicleAvailabilityChart data={vehicleAvailability} />}
+          <VehicleAvailabilityChart data={vehicleAvailability} />
         </div>
         <div className="xl:col-span-3">
-          {enquiries && <RecentEnquiries enquiries={enquiries} />}
+          <RecentEnquiries enquiries={enquiries.slice(0, 5)} />
         </div>
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-12 gap-6">
         <div className="xl:col-span-7">
-          {bookings && <UpcomingBookings bookings={bookings} />}
+          <UpcomingBookings bookings={bookings.slice(0, 5)} />
         </div>
         <div className="xl:col-span-5">
-          {quotations && <RecentQuotations quotations={quotations} />}
+          <RecentQuotations quotations={quotations.slice(0, 5)} />
         </div>
       </div>
 

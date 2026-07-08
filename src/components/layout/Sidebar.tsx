@@ -12,6 +12,7 @@ import {
   Settings,
   Car,
   Headset,
+  ClipboardList,
 } from 'lucide-react';
 
 const menuItems = [
@@ -24,6 +25,7 @@ const menuItems = [
   { icon: BarChart3, label: 'Reports', path: '/reports' },
   { icon: Receipt, label: 'Payments', path: '/payments' },
   { icon: UserCog, label: 'Users', path: '/users' },
+  { icon: ClipboardList, label: 'Audit Log', path: '/audit-log' },
   { icon: Settings, label: 'Settings', path: '/settings' },
 ];
 

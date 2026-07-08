@@ -1,66 +1,172 @@
-import { useFetchData } from '../hooks/useFetchData';
-import { api } from '../services/api';
+import { useMemo, useState } from 'react';
+import { ChevronLeft, ChevronRight, CalendarDays } from 'lucide-react';
+import { Button } from '../components/ui/button';
+import { Badge } from '../components/ui/badge';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '../components/ui/dialog';
+import { useAppContext } from '../context/AppContext';
 import { Booking } from '../types';
 
-export function Calendar() {
-  const { data: bookings, loading } = useFetchData<Booking[]>(api.getBookings);
+const statusColors: Record<Booking['status'], string> = {
+  Confirmed: 'bg-green-100 text-green-800',
+  Upcoming: 'bg-blue-100 text-blue-800',
+  Completed: 'bg-slate-100 text-slate-800',
+  Cancelled: 'bg-red-100 text-red-800',
+};
 
-  if (loading) {
-    return <div className="text-center py-12">Loading calendar...</div>;
-  }
+const statusDot: Record<Booking['status'], string> = {
+  Confirmed: 'bg-green-500',
+  Upcoming: 'bg-blue-500',
+  Completed: 'bg-slate-400',
+  Cancelled: 'bg-red-500',
+};
+
+export function Calendar() {
+  const { bookings } = useAppContext();
+  const [cursor, setCursor] = useState(() => new Date());
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+
+  const year = cursor.getFullYear();
+  const month = cursor.getMonth();
+
+  const bookingsByDay = useMemo(() => {
+    const map = new Map<string, Booking[]>();
+    bookings.forEach((b) => {
+      const key = b.pickupDate;
+      if (!map.has(key)) map.set(key, []);
+      map.get(key)!.push(b);
+    });
+    return map;
+  }, [bookings]);
+
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const firstWeekday = new Date(year, month, 1).getDay();
+  const cells: (number | null)[] = [
+    ...Array(firstWeekday).fill(null),
+    ...Array.from({ length: daysInMonth }, (_, i) => i + 1),
+  ];
+
+  const dateKey = (day: number) => {
+    const d = new Date(year, month, day);
+    return d.toISOString().slice(0, 10);
+  };
+
+  const isToday = (day: number) => {
+    const today = new Date();
+    return day === today.getDate() && month === today.getMonth() && year === today.getFullYear();
+  };
+
+  const selectedBookings = selectedDate ? bookingsByDay.get(selectedDate.toISOString().slice(0, 10)) || [] : [];
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold">Calendar</h2>
-        <div className="flex gap-2">
-          <span className="flex items-center gap-1">
-            <span className="w-3 h-3 rounded-full bg-green-500"></span>
-            Confirmed
-          </span>
-          <span className="flex items-center gap-1">
-            <span className="w-3 h-3 rounded-full bg-blue-500"></span>
-            Upcoming
-          </span>
-          <span className="flex items-center gap-1">
-            <span className="w-3 h-3 rounded-full bg-slate-500"></span>
-            Completed
-          </span>
+      <div className="flex items-center justify-between flex-wrap gap-3">
+        <div>
+          <h2 className="text-xl font-bold text-slate-800 dark:text-white">Calendar</h2>
+          <p className="text-sm text-slate-500 dark:text-slate-400">Visual overview of pickups this month</p>
+        </div>
+        <div className="flex items-center gap-4 flex-wrap">
+          <div className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">
+            <span className="h-2.5 w-2.5 rounded-full bg-green-500" /> Confirmed
+            <span className="h-2.5 w-2.5 rounded-full bg-blue-500 ml-2" /> Upcoming
+            <span className="h-2.5 w-2.5 rounded-full bg-slate-400 ml-2" /> Completed
+          </div>
         </div>
       </div>
-      <div className="bg-white rounded-lg border border-slate-200 p-6">
-        <div className="grid grid-cols-7 gap-2">
+
+      <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 p-6">
+        <div className="flex items-center justify-between mb-6">
+          <Button variant="outline" size="icon" onClick={() => setCursor(new Date(year, month - 1, 1))}>
+            <ChevronLeft size={18} />
+          </Button>
+          <h3 className="text-lg font-semibold text-slate-800 dark:text-white">
+            {cursor.toLocaleString('default', { month: 'long', year: 'numeric' })}
+          </h3>
+          <Button variant="outline" size="icon" onClick={() => setCursor(new Date(year, month + 1, 1))}>
+            <ChevronRight size={18} />
+          </Button>
+        </div>
+
+        <div className="grid grid-cols-7 gap-2 mb-2">
           {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
-            <div key={day} className="text-center font-medium text-slate-600 py-2">
-              {day}
-            </div>
+            <div key={day} className="text-center text-xs font-semibold text-slate-400 py-2">{day}</div>
           ))}
-          {Array.from({ length: 31 }, (_, i) => i + 1).map((date) => {
-            const hasBooking = (bookings || []).some((b: Booking) => 
-              new Date(b.pickupDate).getDate() === date
-            );
+        </div>
+
+        <div className="grid grid-cols-7 gap-2">
+          {cells.map((day, i) => {
+            if (day === null) return <div key={`empty-${i}`} />;
+            const key = dateKey(day);
+            const dayBookings = bookingsByDay.get(key) || [];
             return (
-              <div
-                key={date}
-                className={`text-center py-2 rounded-lg ${
-                  hasBooking ? 'bg-blue-100 text-blue-800 font-medium' : 'hover:bg-slate-50'
+              <button
+                key={key}
+                onClick={() => setSelectedDate(new Date(year, month, day))}
+                className={`aspect-square rounded-xl border p-1.5 flex flex-col items-center justify-start gap-1 transition-colors ${
+                  isToday(day)
+                    ? 'border-blue-500 bg-blue-50 dark:bg-blue-950/40'
+                    : 'border-slate-100 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800'
                 }`}
               >
-                {date}
-              </div>
+                <span className={`text-sm ${isToday(day) ? 'font-bold text-blue-700 dark:text-blue-300' : 'text-slate-700 dark:text-slate-300'}`}>
+                  {day}
+                </span>
+                <div className="flex gap-0.5 flex-wrap justify-center">
+                  {dayBookings.slice(0, 3).map((b) => (
+                    <span key={b.id} className={`h-1.5 w-1.5 rounded-full ${statusDot[b.status]}`} />
+                  ))}
+                  {dayBookings.length > 3 && <span className="text-[9px] text-slate-400">+{dayBookings.length - 3}</span>}
+                </div>
+              </button>
             );
           })}
         </div>
-        <div className="mt-6">
-          <h3 className="font-medium mb-2">Today's Bookings</h3>
-          {(bookings || []).slice(0, 3).map((booking: Booking) => (
-            <div key={booking.id} className="flex justify-between py-2 border-b">
-              <span>{booking.customer} - {booking.vehicle}</span>
-              <span className="text-sm text-slate-500">{booking.pickupDate}</span>
+      </div>
+
+      <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 p-6">
+        <h3 className="font-semibold text-slate-800 dark:text-white mb-3">Upcoming Pickups</h3>
+        <div className="divide-y divide-slate-100 dark:divide-slate-800">
+          {bookings.slice(0, 5).map((booking) => (
+            <div key={booking.id} className="flex justify-between items-center py-3">
+              <div>
+                <p className="text-sm font-medium text-slate-700 dark:text-slate-200">{booking.customer} — {booking.vehicle}</p>
+                <p className="text-xs text-slate-400">{booking.pickupDate}</p>
+              </div>
+              <Badge className={statusColors[booking.status]}>{booking.status}</Badge>
             </div>
           ))}
+          {bookings.length === 0 && <p className="text-sm text-slate-400 py-4 text-center">No bookings scheduled.</p>}
         </div>
       </div>
+
+      <Dialog open={!!selectedDate} onOpenChange={(v) => !v && setSelectedDate(null)}>
+        <DialogContent className="sm:max-w-md bg-white dark:bg-slate-900 dark:text-white rounded-2xl">
+          <DialogHeader>
+            <div className="flex items-center gap-2">
+              <CalendarDays size={18} className="text-blue-600" />
+              <DialogTitle>
+                {selectedDate?.toLocaleDateString('default', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}
+              </DialogTitle>
+            </div>
+            <DialogDescription>
+              {selectedBookings.length} pickup{selectedBookings.length !== 1 ? 's' : ''} scheduled
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3 pt-2 max-h-80 overflow-y-auto">
+            {selectedBookings.length === 0 && (
+              <p className="text-sm text-slate-400 text-center py-6">No bookings on this date.</p>
+            )}
+            {selectedBookings.map((b) => (
+              <div key={b.id} className="border border-slate-100 dark:border-slate-800 rounded-lg p-3 flex justify-between items-center">
+                <div>
+                  <p className="text-sm font-medium text-slate-800 dark:text-white">{b.customer}</p>
+                  <p className="text-xs text-slate-400">{b.vehicle} · {b.bookingId}</p>
+                </div>
+                <Badge className={statusColors[b.status]}>{b.status}</Badge>
+              </div>
+            ))}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
