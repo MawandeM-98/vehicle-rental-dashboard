@@ -1,5 +1,7 @@
+import { useNavigate } from 'react-router-dom';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
 import { Badge } from '../ui/badge';
+import { Panel } from '../ui/panel';
 import { Booking } from '../../types';
 
 const statusColors: Record<Booking['status'], string> = {
@@ -10,9 +12,11 @@ const statusColors: Record<Booking['status'], string> = {
 };
 
 export function UpcomingBookings({ bookings }: { bookings: Booking[] }) {
+  const navigate = useNavigate();
+
   return (
-    <div className="bg-white rounded-xl border border-slate-200 p-6 h-full flex flex-col">
-      <h3 className="text-base font-semibold text-slate-800 mb-4">Upcoming Bookings</h3>
+    <Panel className="p-6 h-full flex flex-col">
+      <h3 className="text-base font-semibold text-slate-800 dark:text-white mb-4">Upcoming Bookings</h3>
       <div className="overflow-x-auto">
         <Table>
           <TableHeader>
@@ -41,11 +45,14 @@ export function UpcomingBookings({ bookings }: { bookings: Booking[] }) {
           </TableBody>
         </Table>
       </div>
-      <div className="text-center mt-4 pt-4 border-t border-slate-100">
-        <button className="text-sm text-blue-600 hover:text-blue-800 font-medium">
+      <div className="text-center mt-4 pt-4 border-t border-slate-100 dark:border-slate-800">
+        <button
+          onClick={() => navigate('/bookings')}
+          className="text-sm text-blue-600 hover:text-blue-800 font-medium"
+        >
           View All Bookings →
         </button>
       </div>
-    </div>
+    </Panel>
   );
 }

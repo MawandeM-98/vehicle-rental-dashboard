@@ -1,6 +1,7 @@
 import { ClipboardList } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../components/ui/table';
 import { Badge } from '../components/ui/badge';
+import { Panel } from '../components/ui/panel';
 import { useAppContext } from '../context/AppContext';
 import { Role } from '../types';
 
@@ -23,10 +24,10 @@ export function AuditLog() {
         </div>
       </div>
 
-      <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 overflow-x-auto">
+      <Panel className="overflow-x-auto">
         <Table>
           <TableHeader>
-            <TableRow className="dark:border-slate-700">
+            <TableRow>
               <TableHead>Timestamp</TableHead>
               <TableHead>User</TableHead>
               <TableHead>Role</TableHead>
@@ -43,17 +44,17 @@ export function AuditLog() {
               </TableRow>
             )}
             {activityLog.map((entry) => (
-              <TableRow key={entry.id} className="dark:border-slate-800">
-                <TableCell className="text-sm text-slate-500 dark:text-slate-400 whitespace-nowrap">{entry.timestamp}</TableCell>
-                <TableCell className="font-medium dark:text-white">{entry.user}</TableCell>
+              <TableRow key={entry.id}>
+                <TableCell className="text-slate-500 dark:text-slate-400 whitespace-nowrap">{entry.timestamp}</TableCell>
+                <TableCell className="font-medium text-slate-800 dark:text-white">{entry.user}</TableCell>
                 <TableCell><Badge className={roleColors[entry.role]}>{entry.role}</Badge></TableCell>
-                <TableCell className="dark:text-slate-300">{entry.action}</TableCell>
-                <TableCell className="dark:text-slate-300">{entry.entity}</TableCell>
+                <TableCell>{entry.action}</TableCell>
+                <TableCell>{entry.entity}</TableCell>
               </TableRow>
             ))}
           </TableBody>
         </Table>
-      </div>
+      </Panel>
     </div>
   );
 }

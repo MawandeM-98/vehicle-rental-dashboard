@@ -4,6 +4,7 @@ import { Plus, Trash2 } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../components/ui/table';
 import { Badge } from '../components/ui/badge';
 import { Button } from '../components/ui/button';
+import { Panel } from '../components/ui/panel';
 import { NewBookingModal } from '../components/bookings/NewBookingModal';
 import { useAppContext } from '../context/AppContext';
 import { Booking } from '../types';
@@ -20,14 +21,10 @@ export function Bookings() {
   const location = useLocation();
   const navigate = useNavigate();
 
-  // Lazy initializer reads the nav-state once, on first render, instead of
-  // setting state from inside a useEffect (avoids the set-state-in-effect warning).
   const [modalOpen, setModalOpen] = useState<boolean>(
     () => Boolean((location.state as { openModal?: boolean } | null)?.openModal)
   );
 
-  // If we consumed an openModal flag from navigation state, clear it from
-  // history so refreshing/back-navigating doesn't reopen the modal.
   if ((location.state as { openModal?: boolean } | null)?.openModal) {
     navigate(location.pathname, { replace: true, state: null });
   }
@@ -52,10 +49,10 @@ export function Bookings() {
         )}
       </div>
 
-      <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 overflow-x-auto">
+      <Panel className="overflow-x-auto">
         <Table>
           <TableHeader>
-            <TableRow className="dark:border-slate-700">
+            <TableRow>
               <TableHead>Booking ID</TableHead>
               <TableHead>Customer</TableHead>
               <TableHead>Vehicle</TableHead>
@@ -75,14 +72,14 @@ export function Bookings() {
               </TableRow>
             )}
             {bookings.map((booking) => (
-              <TableRow key={booking.id} className="dark:border-slate-800">
-                <TableCell className="font-medium dark:text-white">{booking.bookingId}</TableCell>
-                <TableCell className="dark:text-slate-300">{booking.customer}</TableCell>
-                <TableCell className="dark:text-slate-300">{booking.vehicle}</TableCell>
-                <TableCell className="dark:text-slate-300">{booking.pickupDate}</TableCell>
-                <TableCell className="dark:text-slate-300">{booking.returnDate}</TableCell>
+              <TableRow key={booking.id}>
+                <TableCell className="font-medium text-slate-800 dark:text-white">{booking.bookingId}</TableCell>
+                <TableCell>{booking.customer}</TableCell>
+                <TableCell>{booking.vehicle}</TableCell>
+                <TableCell>{booking.pickupDate}</TableCell>
+                <TableCell>{booking.returnDate}</TableCell>
                 <TableCell><Badge className={statusColors[booking.status]}>{booking.status}</Badge></TableCell>
-                <TableCell className="text-right dark:text-slate-300">${booking.amount.toFixed(2)}</TableCell>
+                <TableCell className="text-right">${booking.amount.toFixed(2)}</TableCell>
                 {canDelete && (
                   <TableCell className="text-right">
                     <Button
@@ -99,7 +96,7 @@ export function Bookings() {
             ))}
           </TableBody>
         </Table>
-      </div>
+      </Panel>
 
       <NewBookingModal open={modalOpen} onOpenChange={setModalOpen} />
     </div>

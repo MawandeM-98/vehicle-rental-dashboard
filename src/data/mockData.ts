@@ -239,25 +239,30 @@ export const mockVehicles: Vehicle[] = [
     id: '1', name: 'Toyota Hiace', type: 'Van', status: 'Available', rate: 120,
     location: 'Main Branch', rentedDays: 210, availableDays: 300,
     nextServiceDate: '2025-06-15', lastLocationNote: 'Main Branch Lot · 2 mins ago',
+    images: [],
   },
   {
     id: '2', name: 'Mitsubishi Pajero', type: 'SUV', status: 'Rented', rate: 95,
     location: 'Airport Branch', rentedDays: 260, availableDays: 300,
     nextServiceDate: '2025-05-18', lastLocationNote: 'En route to Airport · 12 mins ago',
+    images: [],
   },
   {
     id: '3', name: 'Honda CR-V', type: 'SUV', status: 'Available', rate: 80,
     location: 'Main Branch', rentedDays: 140, availableDays: 300,
     nextServiceDate: '2025-07-02', lastLocationNote: 'Main Branch Lot · 5 mins ago',
+    images: [],
   },
   {
     id: '4', name: 'Isuzu NQR', type: 'Truck', status: 'Maintenance', rate: 150,
     location: 'Workshop', rentedDays: 190, availableDays: 300,
     nextServiceDate: '2025-05-14', lastLocationNote: 'Workshop Bay 3 · 1 hr ago',
+    images: [],
   },
   {
     id: '5', name: 'Toyota Vios', type: 'Sedan', status: 'Available', rate: 55,
     location: 'Airport Branch', rentedDays: 95, availableDays: 300,
     nextServiceDate: '2025-08-01', lastLocationNote: 'Airport Branch Lot · 8 mins ago',
+    images: [],
   },
 ];

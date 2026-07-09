@@ -4,6 +4,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '.
 import { Avatar, AvatarFallback } from '../components/ui/avatar';
 import { Button } from '../components/ui/button';
 import { Badge } from '../components/ui/badge';
+import { Panel } from '../components/ui/panel';
 
 interface AppUser {
   id: string;
@@ -40,10 +41,10 @@ export function Users() {
           <Plus size={16} /> Add User
         </Button>
       </div>
-      <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 overflow-x-auto">
+      <Panel className="overflow-x-auto">
         <Table>
           <TableHeader>
-            <TableRow className="dark:border-slate-700">
+            <TableRow>
               <TableHead>User</TableHead>
               <TableHead>Email</TableHead>
               <TableHead>Role</TableHead>
@@ -53,12 +54,12 @@ export function Users() {
           </TableHeader>
           <TableBody>
             {users.map((user) => (
-              <TableRow key={user.id} className="dark:border-slate-800">
-                <TableCell className="flex items-center gap-3 dark:text-white">
+              <TableRow key={user.id}>
+                <TableCell className="flex items-center gap-3">
                   <Avatar className="h-8 w-8"><AvatarFallback>{user.name.charAt(0)}</AvatarFallback></Avatar>
-                  <span className="font-medium">{user.name}</span>
+                  <span className="font-medium text-slate-800 dark:text-white">{user.name}</span>
                 </TableCell>
-                <TableCell className="dark:text-slate-300">{user.email}</TableCell>
+                <TableCell>{user.email}</TableCell>
                 <TableCell><Badge variant="outline">{user.role}</Badge></TableCell>
                 <TableCell>
                   <Badge className={user.status === 'Active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}>
@@ -74,7 +75,7 @@ export function Users() {
             ))}
           </TableBody>
         </Table>
-      </div>
+      </Panel>
     </div>
   );
 }

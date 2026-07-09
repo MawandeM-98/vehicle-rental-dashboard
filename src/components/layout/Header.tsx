@@ -23,14 +23,20 @@ const pageMeta: Record<string, PageMeta> = {
   '/reports': { title: 'Reports', subtitle: 'Business analytics and insights' },
   '/payments': { title: 'Payments', subtitle: 'Track transactions and payment status' },
   '/users': { title: 'Users', subtitle: 'Manage internal operations team access' },
+  '/audit-log': { title: 'Audit Log', subtitle: 'A complete trail of who did what, and when' },
   '/settings': { title: 'Settings', subtitle: 'Configure your account and system preferences' },
+  '/profile': { title: 'My Profile', subtitle: 'Manage your personal account details' },
 };
+
+function initials(name: string) {
+  return name.split(' ').map((p) => p.charAt(0)).join('').slice(0, 2).toUpperCase();
+}
 
 export function Header() {
   const location = useLocation();
   const navigate = useNavigate();
-  const meta = pageMeta[location.pathname] ?? { title: 'RentXpress', subtitle: '' };
-  const { bookings, quotations, customers, notifications, unreadCount, markNotificationsRead } = useAppContext();
+  const meta = pageMeta[location.pathname] ?? { title: 'Bushlore_Fleet', subtitle: '' };
+  const { bookings, quotations, customers, notifications, unreadCount, markNotificationsRead, adminProfile } = useAppContext();
 
   const [query, setQuery] = useState('');
   const [searchFocused, setSearchFocused] = useState(false);
@@ -191,17 +197,20 @@ export function Header() {
           </PopoverContent>
         </Popover>
 
-        <div className="flex items-center gap-2 pl-2 border-l border-slate-200 dark:border-slate-700">
+        <button
+          onClick={() => navigate('/profile')}
+          className="flex items-center gap-2 pl-2 border-l border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg pr-2 py-1 transition-colors"
+        >
           <Avatar className="h-9 w-9">
-            <AvatarImage src="https://github.com/shadcn.png" />
-            <AvatarFallback>AU</AvatarFallback>
+            {adminProfile.avatarUrl && <AvatarImage src={adminProfile.avatarUrl} />}
+            <AvatarFallback>{initials(adminProfile.name)}</AvatarFallback>
           </Avatar>
-          <div className="hidden sm:block leading-tight">
-            <p className="text-sm font-semibold text-slate-800 dark:text-white">Admin User</p>
-            <p className="text-xs text-slate-500 dark:text-slate-400">Operations Manager</p>
+          <div className="hidden sm:block leading-tight text-left">
+            <p className="text-sm font-semibold text-slate-800 dark:text-white">{adminProfile.name}</p>
+            <p className="text-xs text-slate-500 dark:text-slate-400">{adminProfile.jobTitle}</p>
           </div>
           <ChevronDown size={16} className="text-slate-400 hidden sm:block" />
-        </div>
+        </button>
       </div>
     </header>
   );

@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useCallback, ReactNode } from 'react';
-import { Booking, Quotation, Customer, Enquiry, Vehicle, Role, ActivityLogEntry } from '../types';
+import { Booking, Quotation, Customer, Enquiry, Vehicle, Role, ActivityLogEntry, AdminProfile } from '../types';
 import { mockBookings, mockQuotations, mockCustomers, mockEnquiries, mockVehicles } from '../data/mockData';
+import { loadAdminProfile, saveAdminProfile } from '../utils/storage';
 
 export interface Notification {
   id: string;
@@ -22,6 +23,8 @@ interface AppContextValue {
   setRole: (role: Role) => void;
   canCreate: boolean;
   canDelete: boolean;
+  adminProfile: AdminProfile;
+  updateAdminProfile: (updates: Partial<AdminProfile>) => void;
   addBooking: (data: Omit<Booking, 'id'>) => void;
   deleteBooking: (id: string) => void;
   addQuotation: (data: Omit<Quotation, 'id'>) => void;
@@ -31,6 +34,7 @@ interface AppContextValue {
   addEnquiry: (data: Omit<Enquiry, 'id'>) => void;
   deleteEnquiry: (id: string) => void;
   addVehicle: (data: Omit<Vehicle, 'id'>) => void;
+  updateVehicle: (id: string, updates: Partial<Vehicle>) => void;
   deleteVehicle: (id: string) => void;
   markNotificationsRead: () => void;
 }
@@ -56,6 +60,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [activityLog, setActivityLog] = useState<ActivityLogEntry[]>([]);
   const [role, setRole] = useState<Role>('Admin');
+  const [adminProfile, setAdminProfile] = useState<AdminProfile>(() => loadAdminProfile());
 
   const canCreate = role === 'Admin' || role === 'Manager';
   const canDelete = role === 'Admin';
@@ -70,6 +75,15 @@ export function AppProvider({ children }: { children: ReactNode }) {
       ...prev,
     ].slice(0, 100));
   }, [role]);
+
+  const updateAdminProfile = useCallback((updates: Partial<AdminProfile>) => {
+    setAdminProfile(prev => {
+      const next = { ...prev, ...updates };
+      saveAdminProfile(next);
+      return next;
+    });
+    logActivity('Updated profile', updates.name ?? 'Admin profile');
+  }, [logActivity]);
 
   const addBooking = useCallback((data: Omit<Booking, 'id'>) => {
     setBookings(prev => [{ ...data, id: genId() }, ...prev]);
@@ -133,6 +147,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
     logActivity('Added vehicle', data.name);
   }, [pushNotification, logActivity]);
 
+  const updateVehicle = useCallback((id: string, updates: Partial<Vehicle>) => {
+    setVehicles(prev => prev.map(v => (v.id === id ? { ...v, ...updates } : v)));
+  }, []);
+
   const deleteVehicle = useCallback((id: string) => {
     setVehicles(prev => {
       const target = prev.find(v => v.id === id);
@@ -151,10 +169,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
     <AppContext.Provider
       value={{
         bookings, quotations, customers, enquiries, vehicles, notifications, unreadCount,
-        activityLog, role, setRole, canCreate, canDelete,
+        activityLog, role, setRole, canCreate, canDelete, adminProfile, updateAdminProfile,
         addBooking, deleteBooking, addQuotation, deleteQuotation,
         addCustomer, deleteCustomer, addEnquiry, deleteEnquiry,
-        addVehicle, deleteVehicle, markNotificationsRead,
+        addVehicle, updateVehicle, deleteVehicle, markNotificationsRead,
       }}
     >
       {children}

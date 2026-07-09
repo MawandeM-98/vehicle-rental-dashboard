@@ -4,6 +4,7 @@ import { Plus, Trash2 } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../components/ui/table';
 import { Badge } from '../components/ui/badge';
 import { Button } from '../components/ui/button';
+import { Panel } from '../components/ui/panel';
 import { NewQuotationModal } from '../components/quotations/NewQuotationModal';
 import { useAppContext } from '../context/AppContext';
 import { Quotation } from '../types';
@@ -49,10 +50,10 @@ export function Quotations() {
         )}
       </div>
 
-      <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 overflow-x-auto">
+      <Panel className="overflow-x-auto">
         <Table>
           <TableHeader>
-            <TableRow className="dark:border-slate-700">
+            <TableRow>
               <TableHead>Quote ID</TableHead>
               <TableHead>Customer</TableHead>
               <TableHead className="text-right">Amount</TableHead>
@@ -70,11 +71,11 @@ export function Quotations() {
               </TableRow>
             )}
             {quotations.map((quote) => (
-              <TableRow key={quote.id} className="dark:border-slate-800">
-                <TableCell className="font-medium dark:text-white">{quote.quoteId}</TableCell>
-                <TableCell className="dark:text-slate-300">{quote.customer}</TableCell>
-                <TableCell className="text-right dark:text-slate-300">${quote.amount.toFixed(2)}</TableCell>
-                <TableCell className="dark:text-slate-300">{quote.validUntil}</TableCell>
+              <TableRow key={quote.id}>
+                <TableCell className="font-medium text-slate-800 dark:text-white">{quote.quoteId}</TableCell>
+                <TableCell>{quote.customer}</TableCell>
+                <TableCell className="text-right">${quote.amount.toFixed(2)}</TableCell>
+                <TableCell>{quote.validUntil}</TableCell>
                 <TableCell><Badge className={statusColors[quote.status]}>{quote.status}</Badge></TableCell>
                 {canDelete && (
                   <TableCell className="text-right">
@@ -92,7 +93,7 @@ export function Quotations() {
             ))}
           </TableBody>
         </Table>
-      </div>
+      </Panel>
 
       <NewQuotationModal open={modalOpen} onOpenChange={setModalOpen} />
     </div>

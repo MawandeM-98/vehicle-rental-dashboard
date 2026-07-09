@@ -11,15 +11,15 @@ import { Reports } from './pages/Reports';
 import { Payments } from './pages/Payments';
 import { Users } from './pages/Users';
 import { Settings } from './pages/Settings';
-import { AuditLog } from './pages/AuditLog.tsx';
-import { BookingRequest } from './pages/BookingRequest.tsx';
+import { AuditLog } from './pages/AuditLog';
+import { BookingRequest } from './pages/BookingRequest';
+import { Profile } from './pages/Profile';
 
 function App() {
   return (
     <AppProvider>
       <BrowserRouter>
         <Routes>
-          {/* Public self-service page — no sidebar/header, standalone branded layout */}
           <Route path="/request" element={<BookingRequest />} />
 
           <Route path="/" element={<Layout />}>
@@ -34,6 +34,7 @@ function App() {
             <Route path="users" element={<Users />} />
             <Route path="audit-log" element={<AuditLog />} />
             <Route path="settings" element={<Settings />} />
+            <Route path="profile" element={<Profile />} />
           </Route>
         </Routes>
       </BrowserRouter>

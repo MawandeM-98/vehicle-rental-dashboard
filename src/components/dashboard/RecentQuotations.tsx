@@ -1,5 +1,7 @@
+import { useNavigate } from 'react-router-dom';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
 import { Badge } from '../ui/badge';
+import { Panel } from '../ui/panel';
 import { Quotation } from '../../types';
 
 const statusColors: Record<Quotation['status'], string> = {
@@ -11,11 +13,15 @@ const statusColors: Record<Quotation['status'], string> = {
 };
 
 export function RecentQuotations({ quotations }: { quotations: Quotation[] }) {
+  const navigate = useNavigate();
+
   return (
-    <div className="bg-white rounded-xl border border-slate-200 p-6 h-full flex flex-col">
+    <Panel className="p-6 h-full flex flex-col">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-base font-semibold text-slate-800">Recent Quotations</h3>
-        <button className="text-sm text-blue-600 hover:text-blue-800 font-medium">View All</button>
+        <h3 className="text-base font-semibold text-slate-800 dark:text-white">Recent Quotations</h3>
+        <button onClick={() => navigate('/quotations')} className="text-sm text-blue-600 hover:text-blue-800 font-medium">
+          View All
+        </button>
       </div>
       <div className="overflow-x-auto">
         <Table>
@@ -43,11 +49,6 @@ export function RecentQuotations({ quotations }: { quotations: Quotation[] }) {
           </TableBody>
         </Table>
       </div>
-      <div className="text-center mt-4 pt-4 border-t border-slate-100">
-        <button className="text-sm text-blue-600 hover:text-blue-800 font-medium">
-          View All Quotations →
-        </button>
-      </div>
-    </div>
+    </Panel>
   );
 }

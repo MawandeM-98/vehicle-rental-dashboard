@@ -3,6 +3,7 @@ import { Eye, Trash2, Download } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../components/ui/table';
 import { Badge } from '../components/ui/badge';
+import { Panel } from '../components/ui/panel';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '../components/ui/dialog';
 import { useAppContext } from '../context/AppContext';
 import { exportToCSV } from '../utils/csv';
@@ -64,10 +65,10 @@ export function Payments() {
         </Button>
       </div>
 
-      <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 overflow-x-auto">
+      <Panel className="overflow-x-auto">
         <Table>
           <TableHeader>
-            <TableRow className="dark:border-slate-700">
+            <TableRow>
               <TableHead>Transaction ID</TableHead>
               <TableHead>Customer</TableHead>
               <TableHead className="text-right">Amount</TableHead>
@@ -79,13 +80,13 @@ export function Payments() {
           </TableHeader>
           <TableBody>
             {payments.map((payment) => (
-              <TableRow key={payment.id} className="dark:border-slate-800">
-                <TableCell className="font-medium dark:text-white">{payment.transactionId}</TableCell>
-                <TableCell className="dark:text-slate-300">{payment.customer}</TableCell>
-                <TableCell className="text-right dark:text-slate-300">${payment.amount.toFixed(2)}</TableCell>
-                <TableCell className="dark:text-slate-300">{payment.method}</TableCell>
+              <TableRow key={payment.id}>
+                <TableCell className="font-medium text-slate-800 dark:text-white">{payment.transactionId}</TableCell>
+                <TableCell>{payment.customer}</TableCell>
+                <TableCell className="text-right">${payment.amount.toFixed(2)}</TableCell>
+                <TableCell>{payment.method}</TableCell>
                 <TableCell><Badge className={statusColors[payment.status]}>{payment.status}</Badge></TableCell>
-                <TableCell className="dark:text-slate-300">{payment.date}</TableCell>
+                <TableCell>{payment.date}</TableCell>
                 <TableCell className="text-right flex justify-end gap-1">
                   <Button variant="ghost" size="icon-sm" onClick={() => setSelected(payment)} className="text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950">
                     <Eye size={16} />
@@ -100,7 +101,7 @@ export function Payments() {
             ))}
           </TableBody>
         </Table>
-      </div>
+      </Panel>
 
       <Dialog open={!!selected} onOpenChange={(v) => !v && setSelected(null)}>
         <DialogContent className="sm:max-w-md bg-white dark:bg-slate-900 dark:text-white rounded-2xl">

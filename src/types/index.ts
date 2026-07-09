@@ -83,6 +83,7 @@ export interface Vehicle {
   availableDays: number;
   nextServiceDate: string;
   lastLocationNote: string;
+  images: string[];
 }
 
 export type Role = 'Admin' | 'Manager' | 'Staff';
@@ -94,4 +95,12 @@ export interface ActivityLogEntry {
   role: Role;
   action: string;
   entity: string;
+}
+
+export interface AdminProfile {
+  name: string;
+  email: string;
+  phone: string;
+  jobTitle: string;
+  avatarUrl: string | null;
 }

@@ -1,4 +1,5 @@
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { Panel } from '../ui/panel';
 import { BookingBreakdown, BookingsOverviewPoint } from '../../types';
 
 interface BookingsOverviewChartProps {
@@ -8,11 +9,11 @@ interface BookingsOverviewChartProps {
 
 export function BookingsOverviewChart({ data, breakdown }: BookingsOverviewChartProps) {
   return (
-    <div className="bg-white rounded-xl border border-slate-200 p-6 h-full">
+    <Panel className="p-6 h-full">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-base font-semibold text-slate-800">Bookings Overview</h3>
+        <h3 className="text-base font-semibold text-slate-800 dark:text-white">Bookings Overview</h3>
         <select
-          className="text-sm border border-slate-200 rounded-lg px-2.5 py-1.5 text-slate-600 bg-white outline-none focus:ring-2 focus:ring-blue-500/30"
+          className="text-sm border border-slate-200 dark:border-slate-700 rounded-lg px-2.5 py-1.5 text-slate-600 dark:text-slate-200 bg-white dark:bg-slate-800 outline-none focus:ring-2 focus:ring-blue-500/30"
           defaultValue="month"
         >
           <option value="week">This Week</option>
@@ -50,24 +51,24 @@ export function BookingsOverviewChart({ data, breakdown }: BookingsOverviewChart
         </ResponsiveContainer>
       </div>
 
-      <div className="grid grid-cols-4 gap-2 mt-5 pt-5 border-t border-slate-100">
+      <div className="grid grid-cols-4 gap-2 mt-5 pt-5 border-t border-slate-100 dark:border-slate-800">
         <div>
-          <p className="text-xs text-slate-500">Confirmed</p>
+          <p className="text-xs text-slate-500 dark:text-slate-400">Confirmed</p>
           <p className="text-xl font-bold text-blue-600 mt-0.5">{breakdown.confirmed}</p>
         </div>
         <div>
-          <p className="text-xs text-slate-500">Upcoming</p>
+          <p className="text-xs text-slate-500 dark:text-slate-400">Upcoming</p>
           <p className="text-xl font-bold text-orange-500 mt-0.5">{breakdown.upcoming}</p>
         </div>
         <div>
-          <p className="text-xs text-slate-500">Ongoing</p>
+          <p className="text-xs text-slate-500 dark:text-slate-400">Ongoing</p>
           <p className="text-xl font-bold text-green-600 mt-0.5">{breakdown.ongoing}</p>
         </div>
         <div>
-          <p className="text-xs text-slate-500">Completed</p>
+          <p className="text-xs text-slate-500 dark:text-slate-400">Completed</p>
           <p className="text-xl font-bold text-purple-600 mt-0.5">{breakdown.completed}</p>
         </div>
       </div>
-    </div>
+    </Panel>
   );
 }

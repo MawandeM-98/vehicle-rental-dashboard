@@ -1,11 +1,12 @@
 import { useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { Plus, Trash2 } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../components/ui/table';
 import { Avatar, AvatarFallback } from '../components/ui/avatar';
 import { Button } from '../components/ui/button';
 import { Badge } from '../components/ui/badge';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '../components/ui/tabs';
+import { Panel } from '../components/ui/panel';
 import { NewCustomerModal } from '../components/customers/NewCustomerModal';
 import { NewEnquiryModal } from '../components/enquiries/NewEnquiryModal';
 import { useAppContext } from '../context/AppContext';
@@ -26,17 +27,16 @@ export function Customers() {
   const { customers, deleteCustomer, enquiries, deleteEnquiry, canCreate, canDelete } = useAppContext();
   const location = useLocation();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const navState = location.state as CustomersNavState | null;
 
-  const [customerModalOpen, setCustomerModalOpen] = useState<boolean>(
-    () => Boolean(navState?.openModal)
-  );
-  const [enquiryModalOpen, setEnquiryModalOpen] = useState<boolean>(
-    () => Boolean(navState?.openEnquiryModal)
-  );
+  const initialTab = searchParams.get('tab') === 'enquiries' ? 'enquiries' : 'customers';
+
+  const [customerModalOpen, setCustomerModalOpen] = useState<boolean>(() => Boolean(navState?.openModal));
+  const [enquiryModalOpen, setEnquiryModalOpen] = useState<boolean>(() => Boolean(navState?.openEnquiryModal));
 
   if (navState?.openEnquiryModal || navState?.openModal) {
-    navigate(location.pathname, { replace: true, state: null });
+    navigate(location.pathname + location.search, { replace: true, state: null });
   }
 
   return (
@@ -48,7 +48,7 @@ export function Customers() {
         </p>
       </div>
 
-      <Tabs defaultValue="customers">
+      <Tabs defaultValue={initialTab}>
         <TabsList>
           <TabsTrigger value="customers">Customers</TabsTrigger>
           <TabsTrigger value="enquiries">Enquiries</TabsTrigger>
@@ -62,10 +62,10 @@ export function Customers() {
               </Button>
             </div>
           )}
-          <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 overflow-x-auto">
+          <Panel className="overflow-x-auto">
             <Table>
               <TableHeader>
-                <TableRow className="dark:border-slate-700">
+                <TableRow>
                   <TableHead>Customer</TableHead>
                   <TableHead>Company</TableHead>
                   <TableHead>Email</TableHead>
@@ -80,16 +80,16 @@ export function Customers() {
                   <TableRow><TableCell colSpan={7} className="text-center py-10 text-slate-400">No customers yet.</TableCell></TableRow>
                 )}
                 {customers.map((customer) => (
-                  <TableRow key={customer.id} className="dark:border-slate-800">
-                    <TableCell className="flex items-center gap-3 dark:text-white">
+                  <TableRow key={customer.id}>
+                    <TableCell className="flex items-center gap-3">
                       <Avatar className="h-8 w-8"><AvatarFallback>{customer.name.charAt(0)}</AvatarFallback></Avatar>
-                      <span className="font-medium">{customer.name}</span>
+                      <span className="font-medium text-slate-800 dark:text-white">{customer.name}</span>
                     </TableCell>
-                    <TableCell className="dark:text-slate-300">{customer.company}</TableCell>
-                    <TableCell className="dark:text-slate-300">{customer.email}</TableCell>
-                    <TableCell className="dark:text-slate-300">{customer.phone}</TableCell>
-                    <TableCell className="text-right dark:text-slate-300">{customer.totalBookings}</TableCell>
-                    <TableCell className="text-right dark:text-slate-300">${customer.totalSpent.toFixed(2)}</TableCell>
+                    <TableCell>{customer.company}</TableCell>
+                    <TableCell>{customer.email}</TableCell>
+                    <TableCell>{customer.phone}</TableCell>
+                    <TableCell className="text-right">{customer.totalBookings}</TableCell>
+                    <TableCell className="text-right">${customer.totalSpent.toFixed(2)}</TableCell>
                     {canDelete && (
                       <TableCell className="text-right">
                         <Button
@@ -106,7 +106,7 @@ export function Customers() {
                 ))}
               </TableBody>
             </Table>
-          </div>
+          </Panel>
         </TabsContent>
 
         <TabsContent value="enquiries" className="mt-4 space-y-4">
@@ -117,10 +117,10 @@ export function Customers() {
               </Button>
             </div>
           )}
-          <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 overflow-x-auto">
+          <Panel className="overflow-x-auto">
             <Table>
               <TableHeader>
-                <TableRow className="dark:border-slate-700">
+                <TableRow>
                   <TableHead>Name</TableHead>
                   <TableHead>Details</TableHead>
                   <TableHead>Logged</TableHead>
@@ -133,10 +133,10 @@ export function Customers() {
                   <TableRow><TableCell colSpan={5} className="text-center py-10 text-slate-400">No enquiries yet.</TableCell></TableRow>
                 )}
                 {enquiries.map((enquiry) => (
-                  <TableRow key={enquiry.id} className="dark:border-slate-800">
-                    <TableCell className="font-medium dark:text-white">{enquiry.name}</TableCell>
-                    <TableCell className="dark:text-slate-300">{enquiry.description}</TableCell>
-                    <TableCell className="dark:text-slate-300">{enquiry.timeAgo}</TableCell>
+                  <TableRow key={enquiry.id}>
+                    <TableCell className="font-medium text-slate-800 dark:text-white">{enquiry.name}</TableCell>
+                    <TableCell>{enquiry.description}</TableCell>
+                    <TableCell>{enquiry.timeAgo}</TableCell>
                     <TableCell><Badge className={enquiryStatusColors[enquiry.status]}>{enquiry.status}</Badge></TableCell>
                     {canDelete && (
                       <TableCell className="text-right">
@@ -154,7 +154,7 @@ export function Customers() {
                 ))}
               </TableBody>
             </Table>
-          </div>
+          </Panel>
         </TabsContent>
       </Tabs>
 

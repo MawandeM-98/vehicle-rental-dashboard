@@ -42,7 +42,7 @@ export function BookingRequest() {
             <Car size={22} className="text-white" />
           </div>
           <span className="text-xl font-bold tracking-tight">
-            <span className="text-white">Rent</span><span className="text-blue-500">Xpress</span>
+            <span className="text-white">Bushlore</span><span className="text-blue-500">_Fleet</span>
           </span>
         </div>
 
@@ -99,7 +99,7 @@ export function BookingRequest() {
             </>
           )}
         </div>
-        <p className="text-center text-xs text-slate-500 mt-4">© {new Date().getFullYear()} Bushlore HR — RentXpress</p>
+        <p className="text-center text-xs text-slate-500 mt-4">© {new Date().getFullYear()} Bushlore HR — Bushlore_Fleet</p>
       </div>
     </div>
   );
